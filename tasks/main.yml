@@ -45,6 +45,7 @@
       dest: /etc/named.conf
     notify:
       - restart bind
+    when: named
 
   - name: Installing DNS Serialnumber generator
     copy:
@@ -98,6 +99,11 @@
     template:
       src: ../templates/dnsmasq.address.conf.j2
       dest: /etc/dnsmasq.d/dnsmasq.address.conf
+
+  - name: Write out "dnsmasq-resolv.conf" file
+    template:
+      src: ../templates/dnsmasq-resolv.conf.j2
+      dest: /etc/dnsmasq-resolv.conf
   
   - name: Write out haproxy config file
     template:
@@ -264,13 +270,21 @@
       enabled: yes
       state: restarted
     with_items:
-      - named
       - haproxy
       - httpd
       - rpcbind
       - nfs-server
       - nfs-lock
       - nfs-idmap
+
+  - name: Starting named services
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: restarted
+    with_items:
+      - named
+    when: named
 
   - name: Starting DHCP/PXE services
     service:

@@ -1,0 +1,2 @@
+nameserver  {{ dns.forwarder1 | default("8.8.8.8") }}
+nameserver  {{ dns.forwarder2 | default("8.8.4.4") }}
