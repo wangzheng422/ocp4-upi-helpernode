@@ -66,6 +66,11 @@ zone "{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ hel
 	type	master;
 	file	"reverse.db";
 };
+
+zone "{{ dns.domain }}" IN {
+	type	master;
+	file	"zonefile.redhat.ren.db";
+};
 ########################################################
 
 include "/etc/named.rfc1912.zones";

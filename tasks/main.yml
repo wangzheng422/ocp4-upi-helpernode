@@ -60,19 +60,44 @@
     set_fact:
       serialnumber: "{{ dymanicserialnumber.stdout }}"
   
-  - name: Write out "{{ dns.domain }}" zone file
+  - name: Write out "{{ dns.clusterid }}.{{ dns.domain }}" zone file
     template:
       src: ../templates/zonefile.j2
       dest: /var/named/zonefile.db
     notify:
       - restart bind
-  
+    when: named
+
+  - name: Write out "{{ dns.domain }}" zone file
+    template:
+      src: ../templates/zonefile.redhat.ren.j2
+      dest: /var/named/zonefile.redhat.ren.db
+    notify:
+      - restart bind
+    when: named
+      
   - name: Write out reverse zone file
     template:
       src: ../templates/reverse.j2
       dest: /var/named/reverse.db
     notify:
       - restart bind
+    when: named
+
+  - name: Write out "dnsmasq.hosts" file
+    template:
+      src: ../templates/dnsmasq.hosts.j2
+      dest: /etc/dnsmasq.hosts
+
+  - name: Create /etc/dnsmasq.d/ if it does not exist
+    file:
+      path: /etc/dnsmasq.d/
+      state: directory
+
+  - name: Write out "dnsmasq.address.conf" file
+    template:
+      src: ../templates/dnsmasq.address.conf.j2
+      dest: /etc/dnsmasq.d/dnsmasq.address.conf
   
   - name: Write out haproxy config file
     template:

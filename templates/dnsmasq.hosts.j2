@@ -1,0 +1,13 @@
+{{ helper.ipaddr }} {{ helper.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+{{ helper.ipaddr }} api.{{ dns.clusterid }}.{{ dns.domain }}	
+{{ helper.ipaddr }} api-int.{{ dns.clusterid }}.{{ dns.domain }}
+{{ helper.ipaddr }} {{ bootstrap.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+{% for m in masters %}
+{{ m.ipaddr }}  {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+{% endfor %}
+{% for w in workers %}
+{{ w.ipaddr }}  {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+{% endfor %}
+{% for m in masters %}
+{{ m.ipaddr }}   etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain }}
+{% endfor %} 

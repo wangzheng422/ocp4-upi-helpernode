@@ -1,5 +1,6 @@
 ---
 staticips: true
+named: true
 helper:
   name: "helper"
   ipaddr: "192.168.7.11"
@@ -9,6 +10,12 @@ dns:
   clusterid: "ocp4"
   forwarder1: "192.168.7.1"
   forwarder2: "192.168.7.1"
+  registry:
+    name: "registry"
+    ipaddr: "192.168.7.1"
+  yum:
+    name: "yum"
+    ipaddr: "192.168.7.1"
 bootstrap:
   name: "bootstrap"
   ipaddr: "192.168.7.12"

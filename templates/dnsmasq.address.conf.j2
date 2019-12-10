@@ -1,0 +1,13 @@
+address=/apps.{{ dns.clusterid }}.{{ dns.domain }}/{{ helper.ipaddr }}
+{% for m in masters %}
+srv-host=_etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain }},etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain }}.,2380,0,10
+{% endfor %}
+{% for m in masters %}
+ptr-record={{ m.ipaddr.split('.')[3] }}.{{ m.ipaddr.split('.')[2] }}.{{ m.ipaddr.split('.')[1] }}.{{ m.ipaddr.split('.')[0] }}.in-addr.arpa,{{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{% endfor %}
+ptr-record={{ bootstrap.ipaddr.split('.')[3] }}.{{ bootstrap.ipaddr.split('.')[2] }}.{{ bootstrap.ipaddr.split('.')[1] }}.{{ bootstrap.ipaddr.split('.')[0] }}.in-addr.arpa,{{ bootstrap.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+ptr-record={{ helper.ipaddr.split('.')[3] }}.{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ helper.ipaddr.split('.')[0] }}.in-addr.arpa,api.{{ dns.clusterid }}.{{ dns.domain }}.
+ptr-record={{ helper.ipaddr.split('.')[3] }}.{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ helper.ipaddr.split('.')[0] }}.in-addr.arpa,api-int.{{ dns.clusterid }}.{{ dns.domain }}.
+{% for w in workers %}
+ptr-record={{ w.ipaddr.split('.')[3] }}.{{ w.ipaddr.split('.')[2] }}.{{ w.ipaddr.split('.')[1] }}.{{ w.ipaddr.split('.')[0] }}.in-addr.arpa,{{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{% endfor %}
