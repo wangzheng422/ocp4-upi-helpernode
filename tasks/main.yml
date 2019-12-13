@@ -68,7 +68,15 @@
     notify:
       - restart bind
     when: named
+    
+  - name: Set zone serial number
+    shell: "/usr/local/bin/set-dns-serial.sh"
+    register: dymanicserialnumber
 
+  - name: Setting serial number as a fact
+    set_fact:
+      serialnumber: "{{ dymanicserialnumber.stdout }}"
+  
   - name: Write out "{{ dns.domain }}" zone file
     template:
       src: ../templates/zonefile.redhat.ren.j2
