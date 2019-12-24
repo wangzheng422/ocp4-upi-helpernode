@@ -64,4 +64,14 @@ You can run this script and it's options to display helpful information about th
 
 Now you're ready to follow the [OCP4 UPI install doc](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#ssh-agent-using_installing-bare-metal)
 
+## stop all service
+```bash
+systemctl stop named && systemctl disable named
+systemctl stop haproxy && systemctl disable haproxy
+systemctl stop httpd && systemctl disable httpd
+systemctl stop dhcpd && systemctl disable dhcpd
+systemctl stop tftp && systemctl disable tftp
+systemctl stop nfs-server && systemctl disable nfs-server
 
+
+```
