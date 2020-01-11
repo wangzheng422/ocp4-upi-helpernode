@@ -420,14 +420,14 @@
       path: /usr/local/bin/README.md
       state: absent
 
-  - name: Downloading filetranspiler source
-    unarchive:
-      src: '{{ ocp_filetranspiler}}'
-      dest: /usr/local/src/
-      remote_src: yes
+  # - name: Downloading filetranspiler source
+  #   unarchive:
+  #     src: '{{ ocp_filetranspiler}}'
+  #     dest: /usr/local/src/
+  #     remote_src: yes
 
-  - name: Building filetranspiler
-    shell: "podman build /usr/local/src/filetranspiler-master -t filetranspiler:latest"
+  # - name: Building filetranspiler
+  #   shell: "podman build /usr/local/src/filetranspiler-master -t filetranspiler:latest"
 
   - name: Installing filetranspiler
     copy:
