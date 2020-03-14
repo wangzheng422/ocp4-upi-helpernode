@@ -1,19 +1,19 @@
 $TTL 1W
-@	IN	SOA	ns1.{{ dns.domain }}.	root (
+@	IN	SOA	ns1.redhat.ren.	root (
 			{{ serialnumber }}	; serial
 			3H		; refresh (3 hours)
 			30M		; retry (30 minutes)
 			2W		; expiry (2 weeks)
 			1W )		; minimum (1 week)
-	IN	NS	ns1.{{ dns.domain }}.
-	IN	MX 10	smtp.{{ dns.domain }}.
+	IN	NS	ns1.redhat.ren.
+	IN	MX 10	smtp.redhat.ren.
 ;
 ; 
 ns1	IN	A	{{ helper.ipaddr }}
 smtp	IN	A	{{ helper.ipaddr }}
 ;
-{{ dns.registry.name }}	IN	A	{{ dns.registry.ipaddr }}
-{{ dns.yum.name }}	IN	A	{{ dns.yum.ipaddr }}
+registry	IN	A	{{ dns.registry.ipaddr }}
+yum		IN	A	{{ dns.yum.ipaddr }}
 gogs	IN	A	{{ helper.ipaddr }}
 nexus	IN	A	{{ helper.ipaddr }}
 etherpad	IN	A	{{ helper.ipaddr }}

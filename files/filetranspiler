@@ -2,6 +2,6 @@
 #
 # Doing it this way is just easier than trying to install python3 on EL7
 # podman run --rm -ti --volume $(pwd):/srv:z localhost/filetranspiler:latest $*
-podman run --rm --volume $(pwd):/srv:z localhost/filetranspiler:latest $*
+podman run --rm --volume $(pwd):/srv:z quay.io/wangzheng422/filetranspiler:latest $*
 ##
 ##
