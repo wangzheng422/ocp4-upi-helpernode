@@ -24,9 +24,9 @@ spec:
             - name: NFS_SERVER
               value: {{ helper.ipaddr }}
             - name: NFS_PATH
-              value: /export
+              value: /data/export
       volumes:
         - name: nfs-client-root
           nfs:
             server: {{ helper.ipaddr }}
-            path: /export
+            path: /data/export
