@@ -13,6 +13,8 @@ dns:
   registry:
     name: "registry"
     ipaddr: "192.168.7.1"
+  quay:
+    ipaddr: "192.168.7.1"
   yum:
     name: "yum"
     ipaddr: "192.168.7.1"
