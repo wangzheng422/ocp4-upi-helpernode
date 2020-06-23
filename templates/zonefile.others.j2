@@ -1,0 +1,18 @@
+$TTL 1W
+@	IN	SOA	ns1.{{ others.domain }}.	root (
+			{{ serialnumber }}	; serial
+			3H		; refresh (3 hours)
+			30M		; retry (30 minutes)
+			2W		; expiry (2 weeks)
+			1W )		; minimum (1 week)
+	IN	NS	{{ helper.ipaddr }}
+	IN	MX 10	{{ helper.ipaddr }}
+;
+; 
+;
+{% for w in others.hosts %}
+{{ w.name }}		IN	A	{{ w.ipaddr }}
+{% endfor %}
+;
+;
+;EOF
