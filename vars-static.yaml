@@ -35,6 +35,13 @@ workers:
     ipaddr: "192.168.7.17"
   - name: "worker-2"
     ipaddr: "192.168.7.18"
+others:
+  domain: "rhv.redhat.ren"
+  hosts:
+  - name: "manager"
+    ipaddr: "192.168.7.71"
+  - name: "rhv01"
+    ipaddr: "192.168.7.72"
 force_ocp_download: false
 ocp_bios: "file:///root/ocp4/rhcos-4.2.0-x86_64-metal-bios.raw.gz"
 ocp_initramfs: "file:///root/ocp4/rhcos-4.2.0-x86_64-installer-initramfs.img"
