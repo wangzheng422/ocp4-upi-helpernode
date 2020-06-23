@@ -71,6 +71,11 @@ zone "redhat.ren" IN {
 	type	master;
 	file	"zonefile.redhat.ren.db";
 };
+
+zone "{{ others.domain }}" IN {
+	type	master;
+	file	"zonefile.others.db";
+};
 ########################################################
 
 include "/etc/named.rfc1912.zones";

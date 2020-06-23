@@ -84,6 +84,14 @@
     notify:
       - restart bind
     when: named
+
+  - name: Write out "{{ others.domain }}" zone file
+    template:
+      src: ../templates/zonefile.others.j2
+      dest: /var/named/zonefile.others.db
+    notify:
+      - restart bind
+    when: named
       
   - name: Write out reverse zone file
     template:
