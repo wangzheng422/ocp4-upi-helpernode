@@ -26,11 +26,15 @@ options {
 	   attacks. Implementing BCP38 within your network would greatly
 	   reduce such attack surface 
 	*/
+{% if dns_forward is sameas true %}
 	recursion yes;
 
 	/* Fowarders */
 	forward only;
 	forwarders { {{ dns.forwarder1 | default("8.8.8.8") }}; {{ dns.forwarder2 | default("8.8.4.4") }}; };
+{% else %}
+	recursion no;
+{% endif %}
 
 	dnssec-enable yes;
 	dnssec-validation no;

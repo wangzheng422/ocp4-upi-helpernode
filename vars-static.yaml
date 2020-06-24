@@ -1,6 +1,8 @@
 ---
 staticips: true
 named: true
+firewalld: true
+dns_forward: false
 helper:
   name: "helper"
   ipaddr: "192.168.7.11"
