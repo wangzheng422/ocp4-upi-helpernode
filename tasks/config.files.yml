@@ -8,37 +8,6 @@
   - import_tasks: ../handlers/main.yml
   tasks:
 
-  - name: Install needed packages
-    yum:
-      name:
-        - bind
-        - bind-utils
-        - haproxy
-        - httpd
-        - vim
-        - bash-completion
-        - libselinux-python
-        - podman
-        - nfs-utils
-      state: present
-
-  - name: Install packages for DHCP/PXE install
-    yum:
-      name:
-        - dhcp
-        - syslinux
-        - tftp-server
-      state: present
-    when: not staticips
-
-  - name: Write out dhcp file
-    template:
-      src: ../templates/dhcpd.conf.j2
-      dest: /etc/dhcp/dhcpd.conf
-    notify:
-      - restart dhcpd
-    when: not staticips
-
   - name: Write out named file
     template:
       src: ../templates/named.conf.j2
@@ -84,14 +53,6 @@
     notify:
       - restart bind
     when: named
-
-  - name: Write out "{{ others.domain }}" zone file
-    template:
-      src: ../templates/zonefile.others.j2
-      dest: /var/named/zonefile.others.db
-    notify:
-      - restart bind
-    when: named
       
   - name: Write out reverse zone file
     template:
@@ -101,26 +62,6 @@
       - restart bind
     when: named
 
-  # - name: Write out "dnsmasq.hosts" file
-  #   template:
-  #     src: ../templates/dnsmasq.hosts.j2
-  #     dest: /etc/dnsmasq.hosts
-
-  # - name: Create /etc/dnsmasq.d/ if it does not exist
-  #   file:
-  #     path: /etc/dnsmasq.d/
-  #     state: directory
-
-  # - name: Write out "dnsmasq.address.conf" file
-  #   template:
-  #     src: ../templates/dnsmasq.address.conf.j2
-  #     dest: /etc/dnsmasq.d/dnsmasq.address.conf
-
-  # - name: Write out "dnsmasq-resolv.conf" file
-  #   template:
-  #     src: ../templates/dnsmasq-resolv.conf.j2
-  #     dest: /etc/dnsmasq-resolv.conf
-  
   - name: Write out haproxy config file
     template:
       src: ../templates/haproxy.cfg.j2
@@ -161,46 +102,6 @@
       url: "{{ ocp_bios}}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
-
-  - name: Stop and disable firewalld.
-    service:
-       name: firewalld
-       state: stopped
-       enabled: False
-    when: not firewalld
-
-  - name: Start and enable firewalld.
-    service:
-       name: firewalld
-       state: started
-       enabled: True
-    when: firewalld
-
-  - name: Open up firewall ports
-    firewalld:
-      permanent: yes
-      immediate: yes
-      state: enabled
-      port: "{{ item }}"
-    with_items:
-      - 67/udp
-      - 53/tcp
-      - 53/udp
-      - 443/tcp
-      - 80/tcp
-      - 8080/tcp
-      - 6443/tcp
-      - 6443/udp
-      - 22623/tcp
-      - 22623/udp
-      - 9000/tcp
-      - 69/udp
-      - 111/tcp
-      - 2049/tcp
-      - 20048/tcp
-      - 50825/tcp
-      - 53248/tcp
-    when: firewalld
 
   - name: Best effort SELinux repair - DNS
     shell: "restorecon -vR /var/named || true"
@@ -443,42 +344,12 @@
       path: /usr/local/bin/README.md
       state: absent
 
-  # - name: Downloading filetranspiler source
-  #   unarchive:
-  #     src: '{{ ocp_filetranspiler}}'
-  #     dest: /usr/local/src/
-  #     remote_src: yes
-
-  # - name: Building filetranspiler
-  #   shell: "podman build /usr/local/src/filetranspiler-master -t filetranspiler:latest"
-
   - name: Installing filetranspiler
     copy:
       src: ../files/filetranspiler
       dest: /usr/local/bin/filetranspiler
       mode: '0555'
 
-  - name: Get network device system name
-    shell: "nmcli -t dev show {{ helper.networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
-    register: devicesystemname
-
-  - name: Setting network device system name as a fact
-    set_fact:
-      dsname: "{{ devicesystemname.stdout }}"
-
-  - name: Setting DNS server ip on network interface "{{ dsname }}" to 127.0.0.1
-    shell: 'nmcli con mod "{{ dsname }}" ipv4.dns 127.0.0.1'
-
-  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain }}"
-    shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain }}'
-
-  - name: Restarting NetworkManager
-    service:
-      name: "{{ item }}"
-      state: restarted
-    with_items:
-      - NetworkManager
- 
   - name:  Information about this install
     debug:
       msg:
