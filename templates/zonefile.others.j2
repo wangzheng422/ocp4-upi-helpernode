@@ -1,18 +1,18 @@
 $TTL 1W
-@	IN	SOA	ns1.{{ others.domain }}.	root (
+@	IN	SOA	ns1.{{ item.domain }}.	root (
 			{{ serialnumber }}	; serial
 			3H		; refresh (3 hours)
 			30M		; retry (30 minutes)
 			2W		; expiry (2 weeks)
 			1W )		; minimum (1 week)
-	IN	NS	ns1.{{ others.domain }}.
-	IN	MX 10	smtp.{{ others.domain }}.
+	IN	NS	ns1.{{ item.domain }}.
+	IN	MX 10	smtp.{{ item.domain }}.
 ;
 ; 
 ns1	IN	A	{{ helper.ipaddr }}
 smtp	IN	A	{{ helper.ipaddr }}
 ;
-{% for w in others.hosts %}
+{% for w in item.hosts %}
 {{ w.name }}		IN	A	{{ w.ipaddr }}
 {% endfor %}
 ;
