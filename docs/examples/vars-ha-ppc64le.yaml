@@ -1,7 +1,7 @@
 ---
 disk: vda
 helper:
-  name: "helper"
+  name: "vip"
   ipaddr: "192.168.7.77"
 dns:
   domain: "example.com"
@@ -44,3 +44,22 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
+
+high_availability:
+  helpernodes:
+    - name: "helper-1"
+      ipaddr: "192.168.7.2"
+      state: MASTER
+      priority: 100
+    - name: "helper-2"
+      ipaddr: "192.168.7.3"
+      state: BACKUP
+      priority: 90
+
+ppc64le: true
+ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-ppc64le-metal.ppc64le.raw.gz"
+ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-ppc64le-installer-initramfs.ppc64le.img"
+ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-ppc64le-installer-kernel-ppc64le"
+ocp_client: "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.3.18/openshift-client-linux-4.3.18.tar.gz"
+ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.3.18/openshift-install-linux-4.3.18.tar.gz"
+helm_source: "https://get.helm.sh/helm-v3.2.4-linux-ppc64le.tar.gz"

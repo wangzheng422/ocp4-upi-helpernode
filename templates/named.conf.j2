@@ -71,10 +71,12 @@ zone "{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ hel
 	file	"reverse.db";
 };
 
+/*
 zone "redhat.ren" IN {
 	type	master;
 	file	"zonefile.redhat.ren.db";
 };
+*/
 
 {% for w in others %}
 zone "{{ w.domain }}" IN {

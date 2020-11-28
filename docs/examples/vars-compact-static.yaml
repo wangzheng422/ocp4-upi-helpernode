@@ -18,13 +18,6 @@ masters:
     ipaddr: "192.168.7.22"
   - name: "master2"
     ipaddr: "192.168.7.23"
-workers:
-  - name: "worker0"
-    ipaddr: "192.168.7.11"
-  - name: "worker1"
-    ipaddr: "192.168.7.12"
-  - name: "worker2"
-    ipaddr: "192.168.7.13"
 other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"

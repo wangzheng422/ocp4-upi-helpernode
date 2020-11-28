@@ -1,7 +1,7 @@
 ---
 disk: vda
 helper:
-  name: "helper"
+  name: "vip"
   ipaddr: "192.168.7.77"
 dns:
   domain: "example.com"
@@ -44,3 +44,15 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
+    
+high_availability:
+  helpernodes:
+    - name: "helper-1"
+      ipaddr: "192.168.7.2"
+      state: MASTER
+      priority: 100
+    - name: "helper-2"
+      ipaddr: "192.168.7.3"
+      state: BACKUP
+      priority: 90
+

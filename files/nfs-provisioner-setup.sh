@@ -35,12 +35,13 @@ fi
 ## If we are here; I can try and deploy
 oc new-project ${nfsnamespace}
 oc project ${nfsnamespace}
-oc apply -f ${rbac}
+oc create -f ${rbac}
 oc adm policy add-scc-to-user hostmount-anyuid system:serviceaccount:${nfsnamespace}:nfs-client-provisioner
-oc apply -f ${deploy} -n ${nfsnamespace}
-oc apply -f ${sc}
+oc create -f ${deploy} -n ${nfsnamespace}
+oc create -f ${sc}
 oc annotate storageclass nfs-storage-provisioner storageclass.kubernetes.io/is-default-class="true"
 oc project default
+oc rollout status deployment nfs-client-provisioner -n ${nfsnamespace}
 #
 ## Show some info
 cat <<EOF

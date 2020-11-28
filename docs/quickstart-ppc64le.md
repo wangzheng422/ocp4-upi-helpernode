@@ -40,16 +40,16 @@ virsh net-start openshift4
 
 ## Create a CentOS 7/8 VM
 
-Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks-ppc64le.cfg) or [EL 8](docs/examples/helper-ks8-ppc64le.cfg) for the helper node.
 
 __EL 7__
 ```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks-ppc64le.cfg -O helper-ks.cfg
 ```
 
 __EL 8__
 ```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8-ppc64le.cfg -O helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
@@ -58,20 +58,22 @@ Edit `helper-ks.cfg` for your environment and use it to install the helper. The 
 
 __EL 7__
 ```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
---os-variant centos7.0 --network network=openshift4,model=virtio \
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
---initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 
+--disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 
+--os-variant centos7.0 --network network=openshift4,model=virtio 
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-ppc64le-Minimal-2003.iso 
+--initrd-inject helper-ks7.cfg --controller type=scsi,model=virtio-scsi --serial pty 
+--nographics --console pty,target_type=virtio  --extra-args "console=hvc0 inst.text inst.ks=file:/helper-ks.cfg"
 ```
 
 __EL 8__
 ```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
---os-variant centos8 --network network=openshift4,model=virtio \
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8-x86_64-1905-dvd1.iso \
---initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 
+--disk path=/home/libvirt/image_store/ocp4-aHelper.qcow2,bus=virtio,size=50 
+--os-variant centos8 --network network=openshift4,model=virtio 
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8.1.1911-ppc64le-dvd1.iso
+--initrd-inject helper-ks.cfg --controller type=scsi,model=virtio-scsi --serial pty 
+--nographics --console pty,target_type=virtio  --extra-args "console=hvc0 xive=off inst.text inst.ks=file:/helper-ks.cfg"
 ```
 
 The provided Kickstart file installs the helper with the following settings (which is based on the [virt-net.xml](examples/virt-net.xml) file that was used before).
@@ -95,9 +97,21 @@ virsh start ocp4-aHelper
 
 ## Create "empty" VMs
 
-Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs.
+Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.3/installing/installing_ibm_power/installing-ibm-power.html#minimum-resource-requirements_installing-ibm-power) for these VMs.
 
 > Make sure you attached these to the `openshift4` network!
+
+__Bootstrap__
+
+Create bootstrap VM
+
+```
+virt-install --name="ocp4-bootstrap" --vcpus=4 --ram=16384 \
+  --disk path=/var/lib/libvirt/images/ocp4-bootstrap.qcow2,bus=virtio,size=120 \
+  --os-variant rhel8.0 --network network=openshift4,model=virtio \
+  --boot menu=on --print-xml > ocp4-bootstrap.xml
+  virsh define --file ocp4-bootstrap.xml
+```
 
 __Masters__
 
@@ -106,7 +120,7 @@ Create the master VMs
 ```
 for i in master{0..2}
 do
-  virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
+  virt-install --name="ocp4-${i}" --vcpus=4 --ram=16384 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot menu=on --print-xml > ocp4-$i.xml
@@ -114,12 +128,12 @@ do
 done
 ```
 
-__Workers and Bootstrap__
+__Workers__
 
-Create the bootstrap and worker VMs
+Create the worker VMs
 
 ```
-for i in worker{0..1} bootstrap
+for i in worker{0..1}
 do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
@@ -137,7 +151,7 @@ After the helper node is installed; login to it
 ssh root@192.168.7.77
 ```
 
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`
+> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-ppc64le-baseos-rpms`, `rhel-8-for-ppc64le-appstream-rpms`, and `ansible-2.9-for-rhel-8-ppc64le-rpms`
 
 Install EPEL
 
@@ -162,10 +176,10 @@ do
 done
 ```
 
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the "blank" VMs.
 
 ```
-cp docs/examples/vars.yaml .
+cp docs/examples/vars-ppc64le.yaml vars.yaml
 ```
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
@@ -308,7 +322,6 @@ On your laptop/workstation visit the status page
 ```
 firefox http://192.168.7.77:9000
 ```
-> :warning: Make sure you don't expose this port in public cloud environments!
 
 You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
@@ -343,31 +356,15 @@ First, login to your cluster
 export KUBECONFIG=/root/ocp4/auth/kubeconfig
 ```
 
-Your install may be waiting for worker nodes to get approved. Normally the `machineconfig node approval operator` takes care of this for you. However, sometimes this needs to be done manually. Check pending CSRs with the following command.
+Set the registry for your cluster
 
-```
-oc get csr
-```
-
-You can approve all pending CSRs in "one shot" with the following
-
-```
-oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
-```
-
-You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a `watch` on these CSRs
-
-```
-watch oc get csr
-```
-
-In order to setup your registry, you first have to set the `managementState` to `Managed` for your cluster
+First, you have to set the `managementState` to `Managed` for your cluster
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
 ```
 
-For PoCs, using `emptyDir` is okay (to use PVs follow [this](https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal) doc)
+For PoCs, using `emptyDir` is ok (to use PVs follow [this](https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal) doc)
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
@@ -379,13 +376,31 @@ If you need to expose the registry, run this command
 oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"defaultRoute":true}}'
 ```
 
-To finish the install process, run the following
+> Note: You can watch the operators running with `oc get clusteroperators`
+
+Watch your CSRs. These can take some time; go get come coffee or grab some lunch. You'll see your nodes' CSRs in "Pending" (unless they were "auto approved", if so, you can jump to the `wait-for install-complete` step)
+
+```
+watch oc get csr
+```
+
+To approve them all in one shot...
+
+```
+oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve
+```
+
+Check for the approval status (it should say "Approved,Issued")
+
+```
+oc get csr | grep 'system:node'
+```
+
+Once Approved; finish up the install process
 
 ```
 openshift-install wait-for install-complete
 ```
-
-> Note: You can watch the operators running with `oc get clusteroperators` in another window with a `watch` to see it progress
 
 ## Login to the web console
 

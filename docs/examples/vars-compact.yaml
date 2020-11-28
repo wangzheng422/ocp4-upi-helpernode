@@ -30,16 +30,6 @@ masters:
   - name: "master2"
     ipaddr: "192.168.7.23"
     macaddr: "52:54:00:d5:1c:39"
-workers:
-  - name: "worker0"
-    ipaddr: "192.168.7.11"
-    macaddr: "52:54:00:f4:26:a1"
-  - name: "worker1"
-    ipaddr: "192.168.7.12"
-    macaddr: "52:54:00:82:90:00"
-  - name: "worker2"
-    ipaddr: "192.168.7.13"
-    macaddr: "52:54:00:8e:10:34"
 other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"

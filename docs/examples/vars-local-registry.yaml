@@ -44,3 +44,12 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
+
+setup_registry:
+  deploy: true
+  autosync_registry: true
+  registry_image: docker.io/library/registry:2
+  local_repo: "ocp4/openshift4"
+  product_repo: "openshift-release-dev"
+  release_name: "ocp-release"
+  release_tag: "4.4.9-x86_64"
