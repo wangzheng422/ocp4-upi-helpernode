@@ -104,7 +104,7 @@
     notify:
       - restart bind
     with_items:
-      - "{{ others }}"
+      - "{{ otherdomains }}"
 
   # - name: Write out "{{ dns.domain | lower }}" zone file
   #   template:
@@ -568,15 +568,15 @@
       remote_src: true
     when: ppc64le
 
-  - name: Downloading filetranspiler source
-    git:
-      repo: https://github.com/ashcrow/filetranspiler
-      dest: /usr/local/src/filetranspiler
-    when: install_filetranspiler
+  # - name: Downloading filetranspiler source
+  #   git:
+  #     repo: https://github.com/ashcrow/filetranspiler
+  #     dest: /usr/local/src/filetranspiler
+  #   when: install_filetranspiler
 
-  - name: Building filetranspiler
-    shell: "podman build /usr/local/src/filetranspiler -t filetranspiler:latest"
-    when: install_filetranspiler
+  # - name: Building filetranspiler
+  #   shell: "podman build /usr/local/src/filetranspiler -t filetranspiler:latest"
+  #   when: install_filetranspiler
 
   - name: Installing filetranspiler
     copy:

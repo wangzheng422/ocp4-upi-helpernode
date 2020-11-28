@@ -45,7 +45,7 @@ workers:
     ipaddr: "192.168.7.21"
   - name: "worker-4"
     ipaddr: "192.168.7.22"
-others:
+otherdomains:
   - domain: "rhv.redhat.ren"
     hosts:
     - name: "manager"
