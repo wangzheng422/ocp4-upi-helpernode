@@ -1,6 +1,5 @@
 ---
 staticips: true
-named: true
 firewalld: false
 dns_forward: false
 helper:
@@ -12,14 +11,6 @@ dns:
   clusterid: "ocp4"
   forwarder1: "192.168.7.1"
   forwarder2: "192.168.7.1"
-  registry:
-    name: "registry"
-    ipaddr: "192.168.7.1"
-  quay:
-    ipaddr: "192.168.7.1"
-  yum:
-    name: "yum"
-    ipaddr: "192.168.7.1"
 bootstrap:
   name: "bootstrap"
   ipaddr: "192.168.7.12"
@@ -45,6 +36,13 @@ workers:
     ipaddr: "192.168.7.21"
   - name: "worker-4"
     ipaddr: "192.168.7.22"
+others:
+  - name: "registry"
+    ipaddr: "192.168.7.1"
+  - name: "yum"
+    ipaddr: "192.168.7.1"
+  - name: "quay"
+    ipaddr: "192.168.7.1"
 otherdomains:
   - domain: "rhv.redhat.ren"
     hosts:
@@ -59,10 +57,11 @@ otherdomains:
     - name: "*.apps"
       ipaddr: "192.168.7.72"
 force_ocp_download: false
-ocp_bios: "file:///root/ocp4/rhcos-4.4.3-x86_64-metal.x86_64.raw.gz"
-ocp_initramfs: "file:///root/ocp4/rhcos-4.4.3-x86_64-installer-initramfs.x86_64.img"
-ocp_install_kernel: "file:///root/ocp4/rhcos-4.4.3-x86_64-installer-kernel-x86_64"
-ocp_client: "file:///root/ocp4/4.4.7/openshift-client-linux-4.4.7.tar.gz"
-ocp_installer: "file:///root/ocp4/4.4.7/openshift-install-linux-4.4.7.tar.gz"
-ocp_filetranspiler: "file:///root/ocp4/filetranspiler-master.zip"
+remove_old_config_files: false
+ocp_bios: "file:///data/ocp4/rhcos-live-rootfs.x86_64.img"
+ocp_initramfs: "file:///data/ocp4/rhcos-live-initramfs.x86_64.img"
+ocp_install_kernel: "file:///data/ocp4/rhcos-live-kernel-x86_64"
+ocp_client: "file:///data/ocp4/4.6.5/openshift-client-linux-4.6.5.tar.gz"
+ocp_installer: "file:///data/ocp4/4.6.5/openshift-install-linux-4.6.5.tar.gz"
+ocp_filetranspiler: "file:///data/ocp4/filetranspiler.tgz"
 registry_server: "registry.redhat.ren:5443"

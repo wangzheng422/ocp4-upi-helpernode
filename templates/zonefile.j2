@@ -56,11 +56,7 @@ etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% if other is defined %}
 ; Create entries for the other hosts
 {% for o in other %}
-
-{% if o.name is defined %}
 {{ o.name }}		IN	A	{{ o.ipaddr }}
-{% endif %}
-
 {% endfor %}
 ;
 {% endif %}

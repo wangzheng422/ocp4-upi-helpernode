@@ -27,11 +27,7 @@ $TTL 1W
 ;
 {% if other is defined %}
 {% for o in other %}
-
-{% if o.ipaddr is defined %}
 {{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
-{% endif %}
-
 {% endfor %}
 ;
 {% endif %}
