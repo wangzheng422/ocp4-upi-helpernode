@@ -78,7 +78,7 @@ zone "redhat.ren" IN {
 };
 */
 
-{% for w in others %}
+{% for w in otherdomains %}
 zone "{{ w.domain }}" IN {
 	type	master;
 	file	"zonefile.{{ w.domain }}.db";

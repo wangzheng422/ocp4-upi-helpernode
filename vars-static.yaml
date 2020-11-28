@@ -63,5 +63,17 @@ ocp_initramfs: "file:///data/ocp4/rhcos-live-initramfs.x86_64.img"
 ocp_install_kernel: "file:///data/ocp4/rhcos-live-kernel-x86_64"
 ocp_client: "file:///data/ocp4/4.6.5/openshift-client-linux-4.6.5.tar.gz"
 ocp_installer: "file:///data/ocp4/4.6.5/openshift-install-linux-4.6.5.tar.gz"
+helm_source: "file:///data/ocp4/clients/helm-linux-amd64"
+chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
+ppc64le: false
+chronyconfig:
+  enabled: false
+setup_registry:
+  deploy: false
+  registry_image: docker.io/library/registry:2
+  local_repo: "ocp4/openshift4"
+  product_repo: "openshift-release-dev"
+  release_name: "ocp-release"
+  release_tag: "4.6.1-x86_64"
 ocp_filetranspiler: "file:///data/ocp4/filetranspiler.tgz"
 registry_server: "registry.redhat.ren:5443"
