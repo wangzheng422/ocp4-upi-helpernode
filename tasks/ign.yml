@@ -1,0 +1,31 @@
+---
+- name: Playbook to recreate the RHCOS ISO for static IP
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - block:
+
+    - name: copy bootstrap ign files
+      copy:
+        src: /data/install/bootstrap.ign
+        dest: "/var/www/html/ignition/{{ bootstrap.name | lower }}.ign"
+        mode: '0644'
+
+    - name: copy master ign files
+      copy:
+        src: /data/install/master.ign
+        dest: /var/www/html/ignition/{{ item.name }}.ign
+        mode: '0644'
+      with_items:
+        - "{{ masters }}"
+
+    - name: copy worker ign files
+      copy:
+        src: /data/install/worker.ign
+        dest: /var/www/html/ignition/{{ item.name }}.ign
+        mode: '0644'
+      with_items:
+        - "{{ workers }}"
+
+...

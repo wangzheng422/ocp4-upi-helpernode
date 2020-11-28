@@ -2,10 +2,15 @@
 staticips: true
 firewalld: false
 dns_forward: false
+iso:
+  iso_dl_url: "file:///data/ocp4/rhcos-live.x86_64.iso"
+  my_iso: "rhcos-live.iso"
 helper:
   name: "helper"
   ipaddr: "192.168.7.11"
   networkifacename: "eth0"
+  gateway: "192.168.7.1"
+  netmask: "255.255.255.0"
 dns:
   domain: "redhat.ren"
   clusterid: "ocp4"
@@ -14,6 +19,7 @@ dns:
 bootstrap:
   name: "bootstrap"
   ipaddr: "192.168.7.12"
+  interface: "ens3"
 masters:
   - name: "master-0"
     ipaddr: "192.168.7.13"
@@ -66,6 +72,7 @@ ocp_installer: "file:///data/ocp4/4.6.5/openshift-install-linux-4.6.5.tar.gz"
 helm_source: "/data/ocp4/clients/helm-linux-amd64"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
+arch: 'x86_64'
 chronyconfig:
   enabled: false
 setup_registry:
