@@ -6,5 +6,11 @@
   - "{{ dns.domain }}"
   - "{{ helper.name }}"
   - "{{ bootstrap.name }}"
+
+- name: Validate values for DNS compatibility
+  fail:
+    msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
+  when: item.name is search('{{ chars }}')
+  with_items:
   - "{{ masters }}"
   - "{{ workers | default('') }}"

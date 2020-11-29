@@ -104,4 +104,4 @@ setup_registry:
   release_name: "ocp-release"
   release_tag: "4.6.1-x86_64"
 ocp_filetranspiler: "file:///data/ocp4/filetranspiler.tgz"
-registry_server: "registry.redhat.ren:5443"
+registry_server: "registry.ocp4.redhat.ren:5443"
