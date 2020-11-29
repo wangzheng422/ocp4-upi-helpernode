@@ -76,7 +76,7 @@
       when: ("rootfs" in ocp_bios)    
  
   - name: create bootstrap iso
-    import_tasks: iso.yaml
+    include_tasks: iso.yaml
     vars:
         ipv4: "{{ bootstrap.ipaddr }}"
         gateway: "{{ helper.gateway }}"
@@ -85,8 +85,35 @@
         inventory_hostname_short: "{{ bootstrap.name | lower }}"
         interface: "{{ bootstrap.interface }}"
         dns: "{{ helper.ipaddr }}"
-        install_drive: "vda" 
+        install_drive: "{{ bootstrap.install_drive }}"
 
+  - name: create master iso
+    include_tasks: iso.yaml
+    vars:
+        ipv4: "{{ item.ipaddr }}"
+        gateway: "{{ helper.gateway }}"
+        netmask: "{{ helper.netmask }}"
+        inventory_hostname: "{{ item.name | lower }}"
+        inventory_hostname_short: "{{ item.name | lower }}"
+        interface: "{{ item.interface }}"
+        dns: "{{ helper.ipaddr }}"
+        install_drive: "{{ item.install_drive }}"
+    with_items:
+      - "{{masters}}"
+
+  - name: create worker iso
+    include_tasks: iso.yaml
+    vars:
+        ipv4: "{{ item.ipaddr }}"
+        gateway: "{{ helper.gateway }}"
+        netmask: "{{ helper.netmask }}"
+        inventory_hostname: "{{ item.name | lower }}"
+        inventory_hostname_short: "{{ item.name | lower }}"
+        interface: "{{ item.interface }}"
+        dns: "{{ helper.ipaddr }}"
+        install_drive: "{{ item.install_drive }}"
+    with_items:
+      - "{{workers}}"
 
 - name: Cleanup tasks
   hosts: localhost

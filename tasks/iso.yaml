@@ -61,14 +61,14 @@
 - block:
   - name: Replace the isolinux.cfg file
     template:
-      src: isolinux.cfg-multi.j2
+      src: ../templates/isolinux.cfg-multi.j2
       dest: /tmp/rhcos-iso/isolinux/isolinux.cfg
     become: true
     delegate_to: localhost
 
   - name: Replace the grub.cfg file
     template:
-      src: grub.cfg-multi.j2
+      src: ../templates/grub.cfg-multi.j2
       dest: /tmp/rhcos-iso/EFI/redhat/grub.cfg
     become: true
     delegate_to: localhost
