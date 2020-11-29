@@ -1,5 +1,5 @@
 ---
-- name: Playbook to recreate the RHCOS ISO for static IP
+- name: Playbook to copy ignition files to webserver path
   hosts: localhost
   gather_facts: false
 
