@@ -28,7 +28,7 @@ api-int		IN	A	{{ helper.ipaddr }}
 ; The wildcard also points to the load balancer
 *.apps		IN	A	{{ helper.ipaddr }}
 ;
-{%if setup_registry %}
+{%if setup_registry.deploy %}
 ; Create entry for the local registry
 registry	IN	A	{{ helper.ipaddr }}
 ;

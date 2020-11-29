@@ -59,6 +59,13 @@
         src: /mnt/iso/
         dest: /tmp/rhcos-iso/
 
+    - name: Remove rootfs
+      file:
+        state: absent
+        path: "{{ item }}"
+      with_items:
+        - "/tmp/rhcos-iso/images/pxeboot/rootfs.img"
+
 - name: Create the required ISOs
   hosts: localhost
   serial: 1
@@ -84,7 +91,8 @@
         inventory_hostname: "{{ bootstrap.name | lower }}"
         inventory_hostname_short: "{{ bootstrap.name | lower }}"
         interface: "{{ bootstrap.interface }}"
-        dns: "{{ helper.ipaddr }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
         install_drive: "{{ bootstrap.install_drive }}"
 
   - name: create master iso
@@ -96,7 +104,8 @@
         inventory_hostname: "{{ item.name | lower }}"
         inventory_hostname_short: "{{ item.name | lower }}"
         interface: "{{ item.interface }}"
-        dns: "{{ helper.ipaddr }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
         install_drive: "{{ item.install_drive }}"
     with_items:
       - "{{masters}}"
@@ -110,7 +119,8 @@
         inventory_hostname: "{{ item.name | lower }}"
         inventory_hostname_short: "{{ item.name | lower }}"
         interface: "{{ item.interface }}"
-        dns: "{{ helper.ipaddr }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
         install_drive: "{{ item.install_drive }}"
     with_items:
       - "{{workers}}"
