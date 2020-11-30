@@ -40,7 +40,7 @@ global
 # use if not designated in their block
 #---------------------------------------------------------------------
 defaults
-    mode                    http
+    mode                    tcp
     log                     global
     option                  httplog
     option                  dontlognull
@@ -51,8 +51,8 @@ defaults
     timeout http-request    10s
     timeout queue           1m
     timeout connect         10s
-    timeout client          1m
-    timeout server          1m
+    timeout client          4h
+    timeout server          4h
     timeout http-keep-alive 10s
     timeout check           10s
     maxconn                 3000
@@ -70,55 +70,59 @@ listen stats
 frontend openshift-api-server
     bind *:6443
     default_backend openshift-api-server
-    mode tcp
     option tcplog
 
 backend openshift-api-server
     balance source
-    mode tcp
-    server {{ bootstrap.name }} {{ bootstrap.ipaddr }}:6443 check
+    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% for m in masters %}
-    server {{ m.name }} {{ m.ipaddr }}:6443 check
+    server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
 {% endfor %}
     
 frontend machine-config-server
     bind *:22623
     default_backend machine-config-server
-    mode tcp
     option tcplog
 
 backend machine-config-server
     balance source
-    mode tcp
-    server {{ bootstrap.name }} {{ bootstrap.ipaddr }}:22623 check
+    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% for m in masters %}
-    server {{ m.name }} {{ m.ipaddr }}:22623 check
+    server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
 {% endfor %}
   
 frontend ingress-http
     bind *:80
     default_backend ingress-http
-    mode tcp
     option tcplog
 
 backend ingress-http
     balance source
-    mode tcp
+{% if workers is defined %}
 {% for w in workers %}
-    server {{ w.name }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
+    server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
 {% endfor %}
+{% else %}
+{% for m in masters %}
+    server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
+{% endfor %}
+{% endif %}
    
 frontend ingress-https
     bind *:443
     default_backend ingress-https
-    mode tcp
     option tcplog
 
 backend ingress-https
     balance source
-    mode tcp
+{% if workers is defined %}
 {% for w in workers %}
-    server {{ w.name }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
+    server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
 {% endfor %}
+{% else %}
+{% for m in masters %}
+    server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
+{% endfor %}
+{% endif %}
 
 #---------------------------------------------------------------------

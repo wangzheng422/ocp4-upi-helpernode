@@ -1,0 +1,145 @@
+---
+- name: Playbook to recreate the RHCOS ISO for static IP
+  hosts: localhost
+  gather_facts: false
+
+  pre_tasks: 
+  
+  - name: Ensure mkisofs and rsync is installed
+    yum:
+      name: "{{ packages }}"
+    become: true
+    delegate_to: localhost
+    vars:
+      packages:
+      - rsync
+      - genisoimage
+
+  tasks:
+  - block:
+    # - name: Create the download url for ppc64le
+    #   set_fact:
+    #     dl_url: 'https://mirror.openshift.com/pub/openshift-v{{ ocp_version.split(".")[0] }}/ppc64le/dependencies/rhcos/{{ ocp_version.split(".")[0] }}.{{ ocp_version.split(".")[1] }}/{{ ocp_version }}/{{ iso_name_ppc64 }}'
+    #     my_iso: "{{ iso_name_ppc64 }}"
+    #     my_cksum: "{{ iso_checksum_ppc64 }}"
+    #   when: arch == 'ppc64le'
+ 
+    # - name: Create the download url for x86_64
+    #   set_fact:
+    #     dl_url: 'https://mirror.openshift.com/pub/openshift-v{{ ocp_version.split(".")[0] }}/dependencies/rhcos/{{ ocp_version.split(".")[0] }}.{{ ocp_version.split(".")[1] }}/{{ ocp_version }}/{{ iso_name }}'
+    #     my_iso: "{{ iso_name }}"
+    #     my_cksum: "{{ iso_checksum }}"
+    #   when: arch == 'x86_64'
+ 
+    # - name: Check if ISO is already available
+    #   stat:
+    #     path: /tmp/{{ my_iso }}
+    #     checksum_algorithm: sha256
+    #     get_checksum: yes
+    #   register: iso_file
+
+    - name: Get the original ISO
+      get_url:
+        url: "{{ iso.iso_dl_url }}"
+        dest: /tmp/{{ iso.my_iso }}
+    #     checksum: sha256:{{ my_cksum }}
+    #   when: not iso_file.stat.exists or iso_file.stat.checksum != my_cksum
+
+    - name: Mount ISO
+      mount:
+        src: /tmp/{{ iso.my_iso }}
+        path: /mnt/iso
+        fstype: iso9660
+        opts: ro,noauto
+        state: mounted
+      become: true
+
+    - name: Copy contents of iso
+      synchronize:
+        src: /mnt/iso/
+        dest: /tmp/rhcos-iso/
+
+    - name: Remove rootfs
+      file:
+        state: absent
+        path: "{{ item }}"
+      with_items:
+        - "/tmp/rhcos-iso/images/pxeboot/rootfs.img"
+
+- name: Create the required ISOs
+  hosts: localhost
+  serial: 1
+  gather_facts: false
+
+  tasks:
+  - name: Generate grub2 config files
+    block:
+    - set_fact:
+        coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
+      when: ("metal" in ocp_bios)
+
+    - set_fact:
+        coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
+      when: ("rootfs" in ocp_bios)    
+ 
+  - name: create bootstrap iso
+    include_tasks: iso.yaml
+    vars:
+        ipv4: "{{ bootstrap.ipaddr }}"
+        gateway: "{{ helper.gateway }}"
+        netmask: "{{ helper.netmask }}"
+        inventory_hostname: "{{ bootstrap.name | lower }}"
+        inventory_hostname_short: "{{ bootstrap.name | lower }}"
+        interface: "{{ bootstrap.interface }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
+        install_drive: "{{ bootstrap.install_drive }}"
+
+  - name: create master iso
+    include_tasks: iso.yaml
+    vars:
+        ipv4: "{{ item.ipaddr }}"
+        gateway: "{{ helper.gateway }}"
+        netmask: "{{ helper.netmask }}"
+        inventory_hostname: "{{ item.name | lower }}"
+        inventory_hostname_short: "{{ item.name | lower }}"
+        interface: "{{ item.interface }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
+        install_drive: "{{ item.install_drive }}"
+    with_items:
+      - "{{masters}}"
+
+  - name: create worker iso
+    include_tasks: iso.yaml
+    vars:
+        ipv4: "{{ item.ipaddr }}"
+        gateway: "{{ helper.gateway }}"
+        netmask: "{{ helper.netmask }}"
+        inventory_hostname: "{{ item.name | lower }}"
+        inventory_hostname_short: "{{ item.name | lower }}"
+        interface: "{{ item.interface }}"
+        iso_dns: 
+          - "{{ helper.ipaddr }}"
+        install_drive: "{{ item.install_drive }}"
+    with_items:
+      - "{{workers}}"
+
+- name: Cleanup tasks
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+  - block: 
+    - name: Unmount ISO
+      mount:
+        path: /mnt/iso
+        state: absent
+
+    - name: Remove ISO copy
+      file:
+        path: /tmp/rhcos-iso
+        state: absent
+    become: true
+...

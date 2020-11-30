@@ -22,7 +22,7 @@ cd ~/ocp4-workingdir
 Download the virtual network configuration file, [virt-net.xml](examples/virt-net.xml)
 
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/docs/examples/virt-net.xml
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/virt-net.xml
 ```
 
 Create a virtual network using this file file provided in this repo (modify if you need to).
@@ -38,23 +38,39 @@ virsh net-autostart openshift4
 virsh net-start openshift4
 ```
 
-## Create a CentOS 7 VM
+## Create a CentOS 7/8 VM
 
-Download the [Kickstart file](examples/helper-ks.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
 
+__EL 7__
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/docs/examples/helper-ks.cfg
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
+```
+
+__EL 8__
+```
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
 
 > **NOTE** Change the path to the ISO for your environment
 
+__EL 7__
 ```
 virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
 --disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
---boot menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
+--initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+```
+
+__EL 8__
+```
+virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
+--os-variant centos8 --network network=openshift4,model=virtio \
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8-x86_64-1905-dvd1.iso \
 --initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
 ```
 
@@ -79,7 +95,7 @@ virsh start ocp4-aHelper
 
 ## Create "empty" VMs
 
-Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs. 
+Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs.
 
 > Make sure you attached these to the `openshift4` network!
 
@@ -89,7 +105,7 @@ Create the master VMs
 
 ```
 for i in master{0..2}
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -104,7 +120,7 @@ Create the bootstrap and worker VMs
 
 ```
 for i in worker{0..1} bootstrap
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -121,19 +137,21 @@ After the helper node is installed; login to it
 ssh root@192.168.7.77
 ```
 
-Install `ansible` and `git` and clone this repo
+> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`
 
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos
+Install EPEL
+
+```
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+```
+
+Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
-git clone https://github.com/christianh814/ocp4-upi-helpernode
-cd ocp4-upi-helpernode
+git clone https://github.com/RedHatOfficial/ocp4-helpernode
+cd ocp4-helpernode
 ```
-
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
-
-> **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
 
 Get the Mac addresses with this command running from your hypervisor host:
 
@@ -143,6 +161,14 @@ do
   echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
 done
 ```
+
+Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+
+```
+cp docs/examples/vars.yaml .
+```
+
+> **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
 ## Run the playbook
 
@@ -168,7 +194,31 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Next, create an `install-config.yaml` file
+Create a place to store your pull-secret
+
+```
+mkdir -p ~/.openshift
+```
+
+Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
+
+```shell
+# ls -1 ~/.openshift/pull-secret
+/root/.openshift/pull-secret
+```
+
+This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can use this key or create/user another one if you wish.
+
+```shell
+# ls -1 ~/.ssh/helper_rsa
+/root/.ssh/helper_rsa
+```
+
+> :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
+
+Next, create an `install-config.yaml` file.
+
+> :warning: Make sure you update if your filenames or paths are different.
 
 ```
 cat <<EOF > install-config.yaml
@@ -193,20 +243,20 @@ networking:
   - 172.30.0.0/16
 platform:
   none: {}
-pullSecret: '{"auths": ...}'
-sshKey: 'ssh-ed25519 AAAA...'
+pullSecret: '$(< ~/.openshift/pull-secret)'
+sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
 
-Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Then copy the pull secret. Replace `pullSecret` with that pull secret and `sshKey` with your ssh public key.
-
-First, create the installation manifests
+Create the installation manifests
 
 ```
 openshift-install create manifests
 ```
 
 Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
+
+> :rotating_light: Skip this step if you're installing a compact cluster
 
 ```shell
 $ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
@@ -239,6 +289,7 @@ Finally, copy the ignition files in the `ignition` directory for the websever
 ```
 cp ~/ocp4/*.ign /var/www/html/ignition/
 restorecon -vR /var/www/html/
+chmod o+r /var/www/html/ignition/*.ign
 ```
 
 ## Install VMs
@@ -252,11 +303,12 @@ Boot/install the VMs in the following order
 * Masters
 * Workers
 
-On your laptop/workstation visit the status page 
+On your laptop/workstation visit the status page
 
 ```
 firefox http://192.168.7.77:9000
 ```
+> :warning: Make sure you don't expose this port in public cloud environments!
 
 You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
@@ -271,12 +323,12 @@ openshift-install wait-for bootstrap-complete --log-level debug
 Once you see this message below...
 
 ```
-DEBUG OpenShift Installer v4.2.0-201905212232-dirty 
-DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce 
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443... 
-INFO API v1.13.4+838b4fa up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
-DEBUG Bootstrap status: complete                   
+DEBUG OpenShift Installer v4.2.0-201905212232-dirty
+DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443...
+INFO API v1.13.4+838b4fa up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+DEBUG Bootstrap status: complete
 INFO It is now safe to remove the bootstrap resources
 ```
 
@@ -291,7 +343,31 @@ First, login to your cluster
 export KUBECONFIG=/root/ocp4/auth/kubeconfig
 ```
 
-Set up storage for you registry (to use PVs follow [this](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal))
+Your install may be waiting for worker nodes to get approved. Normally the `machineconfig node approval operator` takes care of this for you. However, sometimes this needs to be done manually. Check pending CSRs with the following command.
+
+```
+oc get csr
+```
+
+You can approve all pending CSRs in "one shot" with the following
+
+```
+oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+```
+
+You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a `watch` on these CSRs
+
+```
+watch oc get csr
+```
+
+In order to setup your registry, you first have to set the `managementState` to `Managed` for your cluster
+
+```
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+```
+
+For PoCs, using `emptyDir` is okay (to use PVs follow [this](https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal) doc)
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
@@ -303,39 +379,37 @@ If you need to expose the registry, run this command
 oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"defaultRoute":true}}'
 ```
 
-> Note: You can watch the operators running with `oc get clusteroperators`
-
-Watch your CSRs. These can take some time; go get come coffee or grab some lunch. You'll see your nodes' CSRs in "Pending" (unless they were "auto approved", if so, you can jump to the `wait-for install-complete` step)
+To finish the install process, run the following
 
 ```
-watch oc get csr
+openshift-install wait-for install-complete
 ```
 
-To approve them all in one shot...
+> Note: You can watch the operators running with `oc get clusteroperators` in another window with a `watch` to see it progress
 
-```
-oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve
-```
+## Login to the web console
 
-Check for the approval status (it should say "Approved,Issued")
+The OpenShift 4 web console will be running at `https://console-openshift-console.apps.{{ dns.clusterid }}.{{ dns.domain }}` (e.g. `https://console-openshift-console.apps.ocp4.example.com`)
 
-```
-oc get csr | grep 'system:node'
-```
-
-Once Approved; finish up the install process
-
-```
-openshift-install wait-for install-complete 
-```
+* Username: kubeadmin
+* Password: the output of `cat /root/ocp4/auth/kubeadmin-password`
 
 ## Upgrade
 
-If you didn't install the latest 4.2.Z release...then just run the following
+If you didn't install the latest release, then just run the following to upgrade.
 
 ```
-oc adm upgrade --to-latest=true
+oc adm upgrade --to-latest
 ```
+
+If you're having issues upgrading you can try adding `--force` to the upgrade command.
+
+```
+oc adm upgrade --to-latest --force
+```
+
+See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
+
 
 Scale the router if you need to
 

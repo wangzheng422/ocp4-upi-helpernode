@@ -17,7 +17,17 @@ spec:
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
-          image: {{ registry_server }}/quay.io/external_storage/nfs-client-provisioner:latest
+{% if ansible_architecture == "ppc64le" and setup_registry.deploy %}
+          image: registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner-ppc64le:latest
+{% elif ansible_architecture == "ppc64le" %}
+          image: ibmcom/nfs-client-provisioner-ppc64le:latest
+{% else %}
+{% if setup_registry.deploy and  setup_registry.autosync_registry %}
+          image: registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest
+{% else %}
+          image: {{ registry_server }}/external_storage/nfs-client-provisioner:latest
+{% endif %}
+{% endif %}
           volumeMounts:
             - name: nfs-client-root
               mountPath: /persistentvolumes
@@ -25,11 +35,11 @@ spec:
             - name: PROVISIONER_NAME
               value: nfs-storage
             - name: NFS_SERVER
-              value: {{ helper.ipaddr }}
+              value: {{ nfs.server | default(helper.ipaddr) }}
             - name: NFS_PATH
-              value: /data/export
+              value: {{ nfs.path | default('/data/export') }}
       volumes:
         - name: nfs-client-root
           nfs:
-            server: {{ helper.ipaddr }}
-            path: /data/export
+            server: {{ nfs.server | default(helper.ipaddr) }}
+            path: {{ nfs.path | default('/data/export') }}
