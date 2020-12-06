@@ -284,6 +284,8 @@
         src: ../templates/pxe-bootstrap.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ bootstrap.install_drive }}"
       notify:
         - restart tftp
 
@@ -292,6 +294,8 @@
         src: ../templates/pxe-master.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ item.install_drive }}"
       with_items: "{{ masters | lower }}"
       notify:
         - restart tftp
@@ -301,6 +305,8 @@
         src: ../templates/pxe-worker.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ item.install_drive }}"
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
