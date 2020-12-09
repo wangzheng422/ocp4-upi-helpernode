@@ -30,7 +30,11 @@ max-lease-time 14400;
 {% endfor %}
 {% endif %}
 		# this will not give out addresses to hosts not listed above
+{% if bm_ipi is sameas true %}
+		allow unknown-clients;
+{% else %}
 		deny unknown-clients;
+{% endif %}
 
 		# this is PXE specific  
 {% if ppc64le is sameas true %}

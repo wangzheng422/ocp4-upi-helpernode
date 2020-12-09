@@ -184,6 +184,12 @@
       dest: /var/www/html/install/metal.raw.gz
       mode: 0644
 
+  - name: Downloading openstack img
+    get_url:
+      url: "{{ ocp_openstack }}"
+      dest: /var/www/html/install/openstack.qcow2.gz
+      mode: 0644
+
   - name: Stop and disable firewalld.
     service:
        name: firewalld
