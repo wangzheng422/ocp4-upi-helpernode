@@ -18,6 +18,8 @@ dns:
   clusterid: "ocp4"
   forwarder1: "192.168.7.1"
   forwarder2: "192.168.7.1"
+  api_vip: "192.168.7.100"
+  ingress_vip: "192.168.7.101"
 dhcp:
   router: "192.168.7.1"
   bcast: "192.168.7.255"

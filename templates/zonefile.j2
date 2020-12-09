@@ -21,12 +21,21 @@ smtp	IN	A	{{ helper.ipaddr }}
 {% endfor %}
 {% endif %}
 ;
+{% if bm_ipi is sameas true %}
+; The api points to the IP of your load balancer
+api		IN	A	{{ dns.api_vip }}
+api-int		IN	A	{{ dns.api_vip }}
+;
+; The wildcard also points to the load balancer
+*.apps		IN	A	{{ dns.ingress_vip }}
+{% else %}
 ; The api points to the IP of your load balancer
 api		IN	A	{{ helper.ipaddr }}
 api-int		IN	A	{{ helper.ipaddr }}
 ;
 ; The wildcard also points to the load balancer
 *.apps		IN	A	{{ helper.ipaddr }}
+{% endif %}
 ;
 {%if setup_registry.deploy %}
 ; Create entry for the local registry
