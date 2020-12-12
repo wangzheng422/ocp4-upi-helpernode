@@ -163,6 +163,7 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
+      force: no
     when: ("metal" in ocp_bios) 
 
   - name: Downloading OCP4 installer rootfs
@@ -170,7 +171,29 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/rootfs.img
       mode: 0555
+      force: no
     when: ("rootfs" in ocp_bios) 
+
+  - name: Downloading qemu img
+    get_url:
+      url: "{{ ocp_qemu }}"
+      dest: /var/www/html/install/rhcos-qemu.x86_64.qcow2.gz
+      mode: 0644
+      force: no
+
+  - name: Downloading metal img
+    get_url:
+      url: "{{ ocp_metal }}"
+      dest: /var/www/html/install/rhcos-metal.x86_64.raw.gz
+      mode: 0644
+      force: no
+
+  - name: Downloading openstack img
+    get_url:
+      url: "{{ ocp_openstack }}"
+      dest: /var/www/html/install/rhcos-openstack.x86_64.qcow2.gz
+      mode: 0644
+      force: no
 
   - name: Stop and disable firewalld.
     service:
@@ -284,6 +307,8 @@
         src: ../templates/pxe-bootstrap.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ bootstrap.install_drive }}"
       notify:
         - restart tftp
 
@@ -292,6 +317,8 @@
         src: ../templates/pxe-master.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ item.install_drive }}"
       with_items: "{{ masters | lower }}"
       notify:
         - restart tftp
@@ -301,6 +328,8 @@
         src: ../templates/pxe-worker.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
+      vars:
+        disk: "{{ item.install_drive }}"
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp

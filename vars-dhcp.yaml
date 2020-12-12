@@ -86,13 +86,8 @@ otherdomains:
       ipaddr: "192.168.7.72"
 force_ocp_download: false
 remove_old_config_files: false
-ocp_bios: "file:///data/ocp4/rhcos-live-rootfs.x86_64.img"
-ocp_initramfs: "file:///data/ocp4/rhcos-live-initramfs.x86_64.img"
-ocp_install_kernel: "file:///data/ocp4/rhcos-live-kernel-x86_64"
 ocp_client: "file:///data/ocp4/4.6.5/openshift-client-linux-4.6.5.tar.gz"
 ocp_installer: "file:///data/ocp4/4.6.5/openshift-install-linux-4.6.5.tar.gz"
-helm_source: "/data/ocp4/clients/helm-linux-amd64"
-chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
 arch: 'x86_64'
 chronyconfig:
