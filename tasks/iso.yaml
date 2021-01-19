@@ -36,6 +36,10 @@
 #   set_fact:
 #     cmd_args: "{{ cmd_args }} {{coreos_inst_url}}"
 
+- name: blacklist nvidia gpu opensource driver
+  set_fact:
+    cmd_args: "{{ cmd_args }} rdblacklist=nouveau"
+
 - name: Add ignition_url
   set_fact:
     cmd_args: "{{ cmd_args }} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ inventory_hostname_short }}.ign"
