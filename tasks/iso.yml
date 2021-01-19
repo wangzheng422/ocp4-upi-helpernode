@@ -59,6 +59,11 @@
         src: /mnt/iso/
         dest: /tmp/rhcos-iso/
 
+    - name: Downloading OCP4 installer rootfs
+      synchronize:
+        src: "/tmp/rhcos-iso/images/pxeboot/rootfs.img"
+        dest: /var/www/html/install/rootfs.img
+
     - name: Remove rootfs
       file:
         state: absent
