@@ -166,13 +166,13 @@
       force: no
     when: ("metal" in ocp_bios) 
 
-  # - name: Downloading OCP4 installer rootfs
-  #   get_url:
-  #     url: "{{ ocp_bios }}"
-  #     dest: /var/www/html/install/rootfs.img
-  #     mode: 0555
-  #     force: no
-  #   when: ("rootfs" in ocp_bios) 
+  - name: Downloading OCP4 installer rootfs
+    get_url:
+      url: "{{ ocp_bios }}"
+      dest: /var/www/html/install/rootfs.img
+      mode: 0644
+      force: no
+    when: ("rootfs" in ocp_bios) 
 
   - name: Downloading qemu img
     get_url:
