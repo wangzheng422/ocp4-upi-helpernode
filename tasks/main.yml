@@ -162,7 +162,7 @@
     get_url:
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
-      mode: 0555
+      mode: 0644
       force: no
     when: ("metal" in ocp_bios) 
 
@@ -170,7 +170,7 @@
     get_url:
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/rootfs.img
-      mode: 0555
+      mode: 0644
       force: no
     when: ("rootfs" in ocp_bios) 
 
