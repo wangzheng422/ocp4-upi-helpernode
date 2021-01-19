@@ -59,12 +59,12 @@
         src: /mnt/iso/
         dest: /tmp/rhcos-iso/
 
-    - name: Remove rootfs
-      file:
-        state: absent
-        path: "{{ item }}"
-      with_items:
-        - "/tmp/rhcos-iso/images/pxeboot/rootfs.img"
+    # - name: Remove rootfs
+    #   file:
+    #     state: absent
+    #     path: "{{ item }}"
+    #   with_items:
+    #     - "/tmp/rhcos-iso/images/pxeboot/rootfs.img"
 
 - name: Create the required ISOs
   hosts: localhost
@@ -75,15 +75,15 @@
     - ../vars/ports.yml
 
   tasks:
-  - name: Generate grub2 config files
-    block:
-    - set_fact:
-        coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
-      when: ("metal" in ocp_bios)
+  # - name: Generate grub2 config files
+  #   block:
+  #   - set_fact:
+  #       coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
+  #     when: ("metal" in ocp_bios)
 
-    - set_fact:
-        coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
-      when: ("rootfs" in ocp_bios)    
+  #   - set_fact:
+  #       coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
+  #     when: ("rootfs" in ocp_bios)    
 
   - name: create bootstrap iso
     include_tasks: iso.yaml
