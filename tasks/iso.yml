@@ -70,6 +70,9 @@
   hosts: localhost
   serial: 1
   gather_facts: false
+  vars_files:
+    - ../vars/main.yml
+    - ../vars/ports.yml
 
   tasks:
   - name: Generate grub2 config files
