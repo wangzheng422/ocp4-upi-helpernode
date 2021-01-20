@@ -127,7 +127,10 @@
         install_drive: "{{ item.install_drive }}"
     with_items:
       - "{{workers}}"
-
+    when:
+      - workers is defined
+      - workers | length > 0
+      
 - name: Cleanup tasks
   hosts: localhost
   gather_facts: false

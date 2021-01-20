@@ -13,4 +13,5 @@
   when: item.name is search('{{ chars }}')
   with_items:
   - "{{ masters }}"
-  - "{{ workers | default('') }}"
+  # - "{{ workers | default('') }}"
+
