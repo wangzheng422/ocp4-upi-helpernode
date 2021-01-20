@@ -27,5 +27,7 @@
         mode: '0644'
       with_items:
         - "{{ workers }}"
-
+      when:
+        - workers is defined
+        - workers | length > 0
 ...
