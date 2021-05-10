@@ -97,7 +97,7 @@ frontend ingress-http
     option tcplog
 
 backend ingress-http
-    balance roundrobin
+    balance source
 {% if workers is defined %}
 {% for w in workers %}
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
@@ -113,7 +113,7 @@ frontend ingress-https
     option tcplog
 
 backend ingress-https
-    balance roundrobin
+    balance source
 {% if workers is defined %}
 {% for w in workers %}
     server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
