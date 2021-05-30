@@ -73,7 +73,7 @@ frontend openshift-api-server
     option tcplog
 
 backend openshift-api-server
-    balance source
+    balance roundrobin
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
@@ -85,7 +85,7 @@ frontend machine-config-server
     option tcplog
 
 backend machine-config-server
-    balance source
+    balance roundrobin
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check

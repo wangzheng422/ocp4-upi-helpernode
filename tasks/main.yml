@@ -144,6 +144,7 @@
     with_items:
       - /var/www/html/install
       - /var/www/html/ignition
+      - /var/www/html/rhacs-chart
 
   - name: Delete OCP4 files, if requested, to download again
     file:
@@ -194,6 +195,13 @@
       dest: /var/www/html/install/rhcos-openstack.x86_64.qcow2.gz
       mode: 0644
       force: no
+
+  - name: copy rhacs chart
+    copy:
+      src: "{{ rhacs_chart }}"
+      dest: /var/www/html/rhacs-chart/
+      mode: 0644
+      force: yes
 
   - name: Stop and disable firewalld.
     service:
@@ -596,6 +604,16 @@
       mode: '0755'
       remote_src: true
     when: ppc64le
+
+  - name: Copy rhacs cli to bin directory for amd64
+    copy:
+      src: "{{ roxctl_source }}"
+      dest: /usr/local/bin/roxctl
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: true
+    when: not ppc64le
 
   # - name: Downloading filetranspiler source
   #   git:

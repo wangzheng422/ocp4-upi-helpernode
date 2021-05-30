@@ -14,6 +14,8 @@ ocp_qemu: "file:///data/ocp4/rhcos-qemu.x86_64.qcow2.gz"
 ocp_metal: "file:///data/ocp4/rhcos-metal.x86_64.raw.gz"
 ocp_openstack: "file:///data/ocp4/rhcos-openstack.x86_64.qcow2.gz"
 helm_source: "/data/ocp4/clients/helm-linux-amd64"
+roxctl_source: "/data/ocp4/clients/roxctl"
+rhacs_chart:  "/data/ocp4/rhacs-chart/"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
 chronyconfig:
