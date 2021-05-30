@@ -18,6 +18,7 @@ roxctl_source: "/data/ocp4/clients/roxctl"
 rhacs_chart:  "/data/ocp4/rhacs-chart/"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
+uefi: false
 chronyconfig:
   enabled: false
 setup_registry:

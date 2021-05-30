@@ -49,7 +49,15 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips
+    when: not staticips and not uefi
+
+  - name: Write out dhcp file (UEFI)
+    template:
+      src: ../templates/dhcpd-uefi.conf.j2
+      dest: /etc/dhcp/dhcpd.conf
+    notify:
+      - restart dhcpd
+    when: not staticips and uefi
 
   - name: Write out named file
     template:
@@ -319,6 +327,7 @@
         disk: "{{ bootstrap.install_drive }}"
       notify:
         - restart tftp
+      when: bootstrap is defined
 
     - name: Set the master specific tftp files
       template:
@@ -346,6 +355,63 @@
         - workers | length > 0
     when: not staticips and not ppc64le
 
+  - name: Prepare UEFI netboot configuration
+    block:
+    - name: Install packages for UEFI install
+      package:
+        name: "{{ uefipkgs }}"
+        state: present
+
+    - name: Create tftp grub2 directory
+      file:
+        path: /var/lib/tftpboot/grub2
+        state: directory
+        mode: '0755'
+
+    - name: copy UEFI shim to grub2 tftpboot/grub2 directory
+      copy:
+        src: /boot/efi/EFI/redhat/shimx64.efi
+        dest: /var/lib/tftpboot/grub2/shimx64.efi
+        mode: '0555'
+        remote_src: yes
+
+    - name: copy grub2 EFI file to tftpboot/grub2 directory
+      copy:
+        src: /boot/efi/EFI/redhat/grubx64.efi
+        dest: /var/lib/tftpboot/grub2/grubx64.efi
+        mode: '0555'
+        remote_src: yes
+
+    - name: Create the bootstrap specific grub2 file
+      template:
+        src: ../templates/grub2-bootstrap.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+        mode: 0555
+      notify:
+        - restart tftp
+
+    - name: Set the master specific tftp files
+      template:
+        src: ../templates/grub2-master.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ masters | lower }}"
+      notify:
+        - restart tftp
+
+    - name: Set the worker specific tftp files
+      template:
+        src: ../templates/grub2-worker.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ workers | lower }}"
+      notify:
+        - restart tftp
+      when:
+        - workers is defined
+        - workers | length > 0
+    when: not staticips and not ppc64le and uefi
+
   - name: Generate grub2 config files
     block:
     - set_fact:
@@ -369,6 +435,7 @@
         role: bootstrap
         mac: "{{ bootstrap.macaddr }}"
       include_tasks: generate_grub.yml
+      when: bootstrap is defined
 
     - name: generate grub entry (masters)
       vars:
@@ -386,7 +453,7 @@
       when:
         - workers is defined
         - workers | length > 0
-    when: not staticips and ppc64le
+    when: not staticips and ppc64le and (("metal" in ocp_bios) or ("rootfs" in ocp_bios))
 
 
   - name: Installing TFTP Systemd helper
@@ -500,7 +567,7 @@
     block:
     - name: Create folder for additional machineconfig
       file:
-        path: ../machineconfig
+        path: "{{ machineconfig_path }}"
         state: directory
 
     - name: Create temporary chrony.conf file
@@ -516,13 +583,13 @@
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
-        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+        dest: "{{ machineconfig_path }}/99-{{item}}-chrony-configuration.yaml"
       loop:
         - master
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
-        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+        dest: "{{ machineconfig_path }}/99-{{item}}-chrony-configuration.yaml"
       loop:
         - worker
       when:
@@ -658,6 +725,10 @@
     with_items:
       - NetworkManager
 
+  - name: Setup keepalived service
+    when: high_availability is defined
+    import_tasks: setup_keepalived.yaml
+
   - name: Setup Local Registry
     when: setup_registry.deploy
     block:
@@ -669,9 +740,9 @@
     - name: Setup Registry
       import_tasks: setup_registry.yaml
 
-  - name: Setup keepalived service
-    when: high_availability is defined
-    import_tasks: setup_keepalived.yaml
+  - name: Enable restart always for critical services
+    include_tasks: restart_config.yaml
+    loop: "{{ critical_services }}"
 
   - name:  Information about this install
     debug:

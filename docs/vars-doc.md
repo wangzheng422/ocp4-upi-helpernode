@@ -224,7 +224,7 @@ Default is set to `false` as to NOT install it.
 
 ### SSH Key
 
-This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssk/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
+This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssh/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
 
 ```
 ssh_gen_key: true
@@ -246,6 +246,18 @@ pxe:
 Default is false to prevent unexpected issues booting hosts in the "other" section.    
 * `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options 
 `templates/default.j2` -> `/var/lib/tftpboot/pxelinux.cfg/default`
+
+### UEFI default config
+
+**OPTIONAL**  
+
+This section influences the creation of uefi artifacts for tftp boot.
+
+```
+uefi: false
+```
+
+Default is false to prevent unexpected issues.
 
 ### Other Nodes
 
@@ -283,8 +295,8 @@ high_availability:
 
 * `high_availability.helpernodes.name` - The hostname (**__WITHOUT__** the fqdn) of the helpernode you want to set
 * `high_availability.helpernodes.ipaddr` - The IP address that you want to set (this modifies the [dns zonefile](../templates/zonefile.j2#L20))
-* `high_availability.helpernodes.state` - The initial state of the helpernode that you want to set (MASTER|BACKUP)
-* `high_availability.helpernodes.priority` - The priority of the helpernode that you want to set (0-255), and the helpernodes configured as state MASTER should have a priority value greater than the helpernodes configured as state BACKUP.
+* `high_availability.helpernodes.state` - The initial state of the helpernode that you want to set (MASTER|BACKUP). There must be exactly 1 helpernode with initial state as MASTER and atleast 1 helpernode with initial state as BACKUP.
+* `high_availability.helpernodes.priority` - The priority of the helpernode that you want to set must be unique within range (0-100), and the helpernodes configured as state MASTER should have a priority value greater than the helpernodes configured as state BACKUP.
 
 **NOTE**: Ensure you update `inventory` file appropriately to run the playbook on all the helpernodes. For more information refer [inventory doc](inventory-ha-doc.md).
 
